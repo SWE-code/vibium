@@ -197,6 +197,7 @@ loop:
     // All checks passed
     perform action
 ```
+<sub>[`autowait.go#L126`](https://github.com/VibiumDev/vibium/blob/66b5bc3/clicker/internal/features/autowait.go#L126)</sub>
 
 This means your code doesn't need retry logic. When you write:
 
