@@ -241,36 +241,38 @@ func main() {
 		Short: "Navigate to a URL and print page info",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			url := args[0]
+			process.WithCleanup(func() {
+				url := args[0]
 
-			fmt.Println("Launching browser...")
-			launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
-				os.Exit(1)
-			}
-			defer waitAndClose(launchResult)
+				fmt.Println("Launching browser...")
+				launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
+					os.Exit(1)
+				}
+				defer waitAndClose(launchResult)
 
-			fmt.Println("Connecting to BiDi...")
-			conn, err := bidi.Connect(launchResult.WebSocketURL)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
-				os.Exit(1)
-			}
-			defer conn.Close()
+				fmt.Println("Connecting to BiDi...")
+				conn, err := bidi.Connect(launchResult.WebSocketURL)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
+					os.Exit(1)
+				}
+				defer conn.Close()
 
-			client := bidi.NewClient(conn)
+				client := bidi.NewClient(conn)
 
-			fmt.Printf("Navigating to %s...\n", url)
-			result, err := client.Navigate("", url)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Navigating to %s...\n", url)
+				result, err := client.Navigate("", url)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
+					os.Exit(1)
+				}
 
-			fmt.Printf("Navigation complete!\n")
-			fmt.Printf("  URL: %s\n", result.URL)
-			fmt.Printf("  Navigation ID: %s\n", result.Navigation)
+				fmt.Printf("Navigation complete!\n")
+				fmt.Printf("  URL: %s\n", result.URL)
+				fmt.Printf("  Navigation ID: %s\n", result.Navigation)
+			})
 		},
 	})
 
@@ -281,57 +283,59 @@ func main() {
   # Saves screenshot to shot.png`,
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			url := args[0]
-			output, _ := cmd.Flags().GetString("output")
+			process.WithCleanup(func() {
+				url := args[0]
+				output, _ := cmd.Flags().GetString("output")
 
-			fmt.Println("Launching browser...")
-			launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
-				os.Exit(1)
-			}
-			defer waitAndClose(launchResult)
+				fmt.Println("Launching browser...")
+				launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
+					os.Exit(1)
+				}
+				defer waitAndClose(launchResult)
 
-			fmt.Println("Connecting to BiDi...")
-			conn, err := bidi.Connect(launchResult.WebSocketURL)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
-				os.Exit(1)
-			}
-			defer conn.Close()
+				fmt.Println("Connecting to BiDi...")
+				conn, err := bidi.Connect(launchResult.WebSocketURL)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
+					os.Exit(1)
+				}
+				defer conn.Close()
 
-			client := bidi.NewClient(conn)
+				client := bidi.NewClient(conn)
 
-			fmt.Printf("Navigating to %s...\n", url)
-			_, err = client.Navigate("", url)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Navigating to %s...\n", url)
+				_, err = client.Navigate("", url)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
+					os.Exit(1)
+				}
 
-			doWaitOpen()
+				doWaitOpen()
 
-			fmt.Println("Capturing screenshot...")
-			base64Data, err := client.CaptureScreenshot("")
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error capturing screenshot: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Println("Capturing screenshot...")
+				base64Data, err := client.CaptureScreenshot("")
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error capturing screenshot: %v\n", err)
+					os.Exit(1)
+				}
 
-			// Decode base64 to PNG bytes
-			pngData, err := base64.StdEncoding.DecodeString(base64Data)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error decoding screenshot: %v\n", err)
-				os.Exit(1)
-			}
+				// Decode base64 to PNG bytes
+				pngData, err := base64.StdEncoding.DecodeString(base64Data)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error decoding screenshot: %v\n", err)
+					os.Exit(1)
+				}
 
-			// Save to file
-			if err := os.WriteFile(output, pngData, 0644); err != nil {
-				fmt.Fprintf(os.Stderr, "Error saving screenshot: %v\n", err)
-				os.Exit(1)
-			}
+				// Save to file
+				if err := os.WriteFile(output, pngData, 0644); err != nil {
+					fmt.Fprintf(os.Stderr, "Error saving screenshot: %v\n", err)
+					os.Exit(1)
+				}
 
-			fmt.Printf("Screenshot saved to %s (%d bytes)\n", output, len(pngData))
+				fmt.Printf("Screenshot saved to %s (%d bytes)\n", output, len(pngData))
+			})
 		},
 	}
 	screenshotCmd.Flags().StringP("output", "o", "screenshot.png", "Output file path")
@@ -344,44 +348,46 @@ func main() {
   # Prints: Example Domain`,
 		Args: cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			url := args[0]
-			expression := args[1]
+			process.WithCleanup(func() {
+				url := args[0]
+				expression := args[1]
 
-			fmt.Println("Launching browser...")
-			launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
-				os.Exit(1)
-			}
-			defer waitAndClose(launchResult)
+				fmt.Println("Launching browser...")
+				launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
+					os.Exit(1)
+				}
+				defer waitAndClose(launchResult)
 
-			fmt.Println("Connecting to BiDi...")
-			conn, err := bidi.Connect(launchResult.WebSocketURL)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
-				os.Exit(1)
-			}
-			defer conn.Close()
+				fmt.Println("Connecting to BiDi...")
+				conn, err := bidi.Connect(launchResult.WebSocketURL)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
+					os.Exit(1)
+				}
+				defer conn.Close()
 
-			client := bidi.NewClient(conn)
+				client := bidi.NewClient(conn)
 
-			fmt.Printf("Navigating to %s...\n", url)
-			_, err = client.Navigate("", url)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Navigating to %s...\n", url)
+				_, err = client.Navigate("", url)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
+					os.Exit(1)
+				}
 
-			doWaitOpen()
+				doWaitOpen()
 
-			fmt.Printf("Evaluating: %s\n", expression)
-			result, err := client.Evaluate("", expression)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error evaluating: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Evaluating: %s\n", expression)
+				result, err := client.Evaluate("", expression)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error evaluating: %v\n", err)
+					os.Exit(1)
+				}
 
-			fmt.Printf("Result: %v\n", result)
+				fmt.Printf("Result: %v\n", result)
+			})
 		},
 	})
 
@@ -392,45 +398,47 @@ func main() {
   # Prints: tag=A, text="Learn more", box={x,y,w,h}`,
 		Args: cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			url := args[0]
-			selector := args[1]
+			process.WithCleanup(func() {
+				url := args[0]
+				selector := args[1]
 
-			fmt.Println("Launching browser...")
-			launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
-				os.Exit(1)
-			}
-			defer waitAndClose(launchResult)
+				fmt.Println("Launching browser...")
+				launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
+					os.Exit(1)
+				}
+				defer waitAndClose(launchResult)
 
-			fmt.Println("Connecting to BiDi...")
-			conn, err := bidi.Connect(launchResult.WebSocketURL)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
-				os.Exit(1)
-			}
-			defer conn.Close()
+				fmt.Println("Connecting to BiDi...")
+				conn, err := bidi.Connect(launchResult.WebSocketURL)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
+					os.Exit(1)
+				}
+				defer conn.Close()
 
-			client := bidi.NewClient(conn)
+				client := bidi.NewClient(conn)
 
-			fmt.Printf("Navigating to %s...\n", url)
-			_, err = client.Navigate("", url)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Navigating to %s...\n", url)
+				_, err = client.Navigate("", url)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
+					os.Exit(1)
+				}
 
-			doWaitOpen()
+				doWaitOpen()
 
-			fmt.Printf("Finding element: %s\n", selector)
-			info, err := client.FindElement("", selector)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error finding element: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Finding element: %s\n", selector)
+				info, err := client.FindElement("", selector)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error finding element: %v\n", err)
+					os.Exit(1)
+				}
 
-			fmt.Printf("Found: tag=%s, text=\"%s\", box={x:%.0f, y:%.0f, w:%.0f, h:%.0f}\n",
-				info.Tag, info.Text, info.Box.X, info.Box.Y, info.Box.Width, info.Box.Height)
+				fmt.Printf("Found: tag=%s, text=\"%s\", box={x:%.0f, y:%.0f, w:%.0f, h:%.0f}\n",
+					info.Tag, info.Text, info.Box.X, info.Box.Y, info.Box.Width, info.Box.Height)
+			})
 		},
 	})
 
@@ -445,64 +453,66 @@ func main() {
   # Custom timeout for actionability checks`,
 		Args: cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			url := args[0]
-			selector := args[1]
-			timeout, _ := cmd.Flags().GetDuration("timeout")
+			process.WithCleanup(func() {
+				url := args[0]
+				selector := args[1]
+				timeout, _ := cmd.Flags().GetDuration("timeout")
 
-			fmt.Println("Launching browser...")
-			launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
-				os.Exit(1)
-			}
-			defer waitAndClose(launchResult)
+				fmt.Println("Launching browser...")
+				launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
+					os.Exit(1)
+				}
+				defer waitAndClose(launchResult)
 
-			fmt.Println("Connecting to BiDi...")
-			conn, err := bidi.Connect(launchResult.WebSocketURL)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
-				os.Exit(1)
-			}
-			defer conn.Close()
+				fmt.Println("Connecting to BiDi...")
+				conn, err := bidi.Connect(launchResult.WebSocketURL)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
+					os.Exit(1)
+				}
+				defer conn.Close()
 
-			client := bidi.NewClient(conn)
+				client := bidi.NewClient(conn)
 
-			fmt.Printf("Navigating to %s...\n", url)
-			_, err = client.Navigate("", url)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Navigating to %s...\n", url)
+				_, err = client.Navigate("", url)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
+					os.Exit(1)
+				}
 
-			doWaitOpen()
+				doWaitOpen()
 
-			// Wait for element to be actionable (Visible, Stable, ReceivesEvents, Enabled)
-			fmt.Printf("Waiting for element to be actionable: %s\n", selector)
-			opts := features.WaitOptions{Timeout: timeout}
-			if err := features.WaitForClick(client, "", selector, opts); err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
-			}
+				// Wait for element to be actionable (Visible, Stable, ReceivesEvents, Enabled)
+				fmt.Printf("Waiting for element to be actionable: %s\n", selector)
+				opts := features.WaitOptions{Timeout: timeout}
+				if err := features.WaitForClick(client, "", selector, opts); err != nil {
+					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+					os.Exit(1)
+				}
 
-			fmt.Printf("Clicking element: %s\n", selector)
-			err = client.ClickElement("", selector)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error clicking: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Clicking element: %s\n", selector)
+				err = client.ClickElement("", selector)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error clicking: %v\n", err)
+					os.Exit(1)
+				}
 
-			// TODO: Replace sleep with proper navigation wait (poll URL change or listen for BiDi events)
-			fmt.Println("Waiting for navigation...")
-			time.Sleep(1 * time.Second)
+				// TODO: Replace sleep with proper navigation wait (poll URL change or listen for BiDi events)
+				fmt.Println("Waiting for navigation...")
+				time.Sleep(1 * time.Second)
 
-			// Get current URL after click
-			currentURL, err := client.GetCurrentURL()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error getting URL: %v\n", err)
-				os.Exit(1)
-			}
+				// Get current URL after click
+				currentURL, err := client.GetCurrentURL()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error getting URL: %v\n", err)
+					os.Exit(1)
+				}
 
-			fmt.Printf("Click complete! Current URL: %s\n", currentURL)
+				fmt.Printf("Click complete! Current URL: %s\n", currentURL)
+			})
 		},
 	}
 	clickCmd.Flags().Duration("timeout", features.DefaultTimeout, "Timeout for actionability checks (e.g., 5s, 30s)")
@@ -519,61 +529,63 @@ func main() {
   # Custom timeout for actionability checks`,
 		Args: cobra.ExactArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
-			url := args[0]
-			selector := args[1]
-			text := args[2]
-			timeout, _ := cmd.Flags().GetDuration("timeout")
+			process.WithCleanup(func() {
+				url := args[0]
+				selector := args[1]
+				text := args[2]
+				timeout, _ := cmd.Flags().GetDuration("timeout")
 
-			fmt.Println("Launching browser...")
-			launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
-				os.Exit(1)
-			}
-			defer waitAndClose(launchResult)
+				fmt.Println("Launching browser...")
+				launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
+					os.Exit(1)
+				}
+				defer waitAndClose(launchResult)
 
-			fmt.Println("Connecting to BiDi...")
-			conn, err := bidi.Connect(launchResult.WebSocketURL)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
-				os.Exit(1)
-			}
-			defer conn.Close()
+				fmt.Println("Connecting to BiDi...")
+				conn, err := bidi.Connect(launchResult.WebSocketURL)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
+					os.Exit(1)
+				}
+				defer conn.Close()
 
-			client := bidi.NewClient(conn)
+				client := bidi.NewClient(conn)
 
-			fmt.Printf("Navigating to %s...\n", url)
-			_, err = client.Navigate("", url)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Navigating to %s...\n", url)
+				_, err = client.Navigate("", url)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
+					os.Exit(1)
+				}
 
-			doWaitOpen()
+				doWaitOpen()
 
-			// Wait for element to be actionable (Visible, Stable, ReceivesEvents, Enabled, Editable)
-			fmt.Printf("Waiting for element to be actionable: %s\n", selector)
-			opts := features.WaitOptions{Timeout: timeout}
-			if err := features.WaitForType(client, "", selector, opts); err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
-			}
+				// Wait for element to be actionable (Visible, Stable, ReceivesEvents, Enabled, Editable)
+				fmt.Printf("Waiting for element to be actionable: %s\n", selector)
+				opts := features.WaitOptions{Timeout: timeout}
+				if err := features.WaitForType(client, "", selector, opts); err != nil {
+					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+					os.Exit(1)
+				}
 
-			fmt.Printf("Typing into element: %s\n", selector)
-			err = client.TypeIntoElement("", selector, text)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error typing: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Typing into element: %s\n", selector)
+				err = client.TypeIntoElement("", selector, text)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error typing: %v\n", err)
+					os.Exit(1)
+				}
 
-			// Get the resulting value
-			value, err := client.GetElementValue("", selector)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error getting value: %v\n", err)
-				os.Exit(1)
-			}
+				// Get the resulting value
+				value, err := client.GetElementValue("", selector)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error getting value: %v\n", err)
+					os.Exit(1)
+				}
 
-			fmt.Printf("Typed \"%s\", value is now: %s\n", text, value)
+				fmt.Printf("Typed \"%s\", value is now: %s\n", text, value)
+			})
 		},
 	}
 	typeCmd.Flags().Duration("timeout", features.DefaultTimeout, "Timeout for actionability checks (e.g., 5s, 30s)")
@@ -592,50 +604,52 @@ func main() {
   # ✗ Editable: false`,
 		Args: cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			url := args[0]
-			selector := args[1]
+			process.WithCleanup(func() {
+				url := args[0]
+				selector := args[1]
 
-			fmt.Println("Launching browser...")
-			launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
-				os.Exit(1)
-			}
-			defer waitAndClose(launchResult)
+				fmt.Println("Launching browser...")
+				launchResult, err := browser.Launch(browser.LaunchOptions{Headless: !headed})
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error launching browser: %v\n", err)
+					os.Exit(1)
+				}
+				defer waitAndClose(launchResult)
 
-			fmt.Println("Connecting to BiDi...")
-			conn, err := bidi.Connect(launchResult.WebSocketURL)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
-				os.Exit(1)
-			}
-			defer conn.Close()
+				fmt.Println("Connecting to BiDi...")
+				conn, err := bidi.Connect(launchResult.WebSocketURL)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error connecting: %v\n", err)
+					os.Exit(1)
+				}
+				defer conn.Close()
 
-			client := bidi.NewClient(conn)
+				client := bidi.NewClient(conn)
 
-			fmt.Printf("Navigating to %s...\n", url)
-			_, err = client.Navigate("", url)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
-				os.Exit(1)
-			}
+				fmt.Printf("Navigating to %s...\n", url)
+				_, err = client.Navigate("", url)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error navigating: %v\n", err)
+					os.Exit(1)
+				}
 
-			doWaitOpen()
+				doWaitOpen()
 
-			fmt.Printf("\nChecking actionability for selector: %s\n", selector)
+				fmt.Printf("\nChecking actionability for selector: %s\n", selector)
 
-			result, err := features.CheckAll(client, "", selector)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
-			}
+				result, err := features.CheckAll(client, "", selector)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+					os.Exit(1)
+				}
 
-			// Print results with checkmarks
-			printCheck("Visible", result.Visible)
-			printCheck("Stable", result.Stable)
-			printCheck("ReceivesEvents", result.ReceivesEvents)
-			printCheck("Enabled", result.Enabled)
-			printCheck("Editable", result.Editable)
+				// Print results with checkmarks
+				printCheck("Visible", result.Visible)
+				printCheck("Stable", result.Stable)
+				printCheck("ReceivesEvents", result.ReceivesEvents)
+				printCheck("Enabled", result.Enabled)
+				printCheck("Editable", result.Editable)
+			})
 		},
 	})
 
@@ -651,39 +665,41 @@ func main() {
   clicker serve --headed
   # Starts server with visible browser windows`,
 		Run: func(cmd *cobra.Command, args []string) {
-			port, _ := cmd.Flags().GetInt("port")
+			process.WithCleanup(func() {
+				port, _ := cmd.Flags().GetInt("port")
 
-			fmt.Printf("Starting Clicker proxy server on port %d...\n", port)
+				fmt.Printf("Starting Clicker proxy server on port %d...\n", port)
 
-			// Create router to manage browser sessions
-			router := proxy.NewRouter(!headed)
+				// Create router to manage browser sessions
+				router := proxy.NewRouter(!headed)
 
-			server := proxy.NewServer(
-				proxy.WithPort(port),
-				proxy.WithOnConnect(router.OnClientConnect),
-				proxy.WithOnMessage(router.OnClientMessage),
-				proxy.WithOnClose(router.OnClientDisconnect),
-			)
+				server := proxy.NewServer(
+					proxy.WithPort(port),
+					proxy.WithOnConnect(router.OnClientConnect),
+					proxy.WithOnMessage(router.OnClientMessage),
+					proxy.WithOnClose(router.OnClientDisconnect),
+				)
 
-			if err := server.Start(); err != nil {
-				fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)
-				os.Exit(1)
-			}
+				if err := server.Start(); err != nil {
+					fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)
+					os.Exit(1)
+				}
 
-			fmt.Printf("Server listening on ws://localhost:%d\n", port)
-			fmt.Println("Press Ctrl+C to stop...")
+				fmt.Printf("Server listening on ws://localhost:%d\n", port)
+				fmt.Println("Press Ctrl+C to stop...")
 
-			// Wait for signal
-			process.WaitForSignal()
+				// Wait for signal
+				process.WaitForSignal()
 
-			fmt.Println("\nShutting down...")
+				fmt.Println("\nShutting down...")
 
-			// Close all browser sessions
-			router.CloseAll()
+				// Close all browser sessions
+				router.CloseAll()
 
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			server.Stop(ctx)
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				server.Stop(ctx)
+			})
 		},
 	}
 	serveCmd.Flags().IntP("port", "p", 9515, "Port to listen on")
@@ -717,17 +733,19 @@ The server provides browser automation tools:
   # Test with echo
   echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"capabilities":{}}}' | clicker mcp`,
 		Run: func(cmd *cobra.Command, args []string) {
-			screenshotDir, _ := cmd.Flags().GetString("screenshot-dir")
+			process.WithCleanup(func() {
+				screenshotDir, _ := cmd.Flags().GetString("screenshot-dir")
 
-			server := mcp.NewServer(version, mcp.ServerOptions{
-				ScreenshotDir: screenshotDir,
+				server := mcp.NewServer(version, mcp.ServerOptions{
+					ScreenshotDir: screenshotDir,
+				})
+				defer server.Close()
+
+				if err := server.Run(); err != nil {
+					fmt.Fprintf(os.Stderr, "MCP server error: %v\n", err)
+					os.Exit(1)
+				}
 			})
-			defer server.Close()
-
-			if err := server.Run(); err != nil {
-				fmt.Fprintf(os.Stderr, "MCP server error: %v\n", err)
-				os.Exit(1)
-			}
 		},
 	}
 	mcpCmd.Flags().String("screenshot-dir", "", "Directory for saving screenshots (if not set, file saving is disabled)")

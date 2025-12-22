@@ -6,6 +6,8 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"github.com/vibium/clicker/internal/log"
 )
 
 // Manager tracks and manages spawned browser processes.
@@ -81,4 +83,17 @@ func WaitForSignal() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
 	KillAll()
+}
+
+// WithCleanup wraps a function with panic recovery that ensures browser cleanup.
+// If the function panics, all tracked browsers are killed before re-panicking.
+func WithCleanup(fn func()) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("panic recovered, cleaning up browsers", "panic", r)
+			KillAll()
+			panic(r) // re-panic after cleanup
+		}
+	}()
+	fn()
 }
