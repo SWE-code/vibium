@@ -1,5 +1,6 @@
 import { spawn, ChildProcess } from 'child_process';
 import { getClickerPath } from './binary';
+import { TimeoutError, BrowserCrashedError } from '../utils/errors';
 
 export interface ClickerProcessOptions {
   port?: number;
@@ -44,7 +45,7 @@ export class ClickerProcess {
 
       const timeout = setTimeout(() => {
         if (!resolved) {
-          reject(new Error('Timeout waiting for clicker to start'));
+          reject(new TimeoutError('clicker', 10000, 'waiting for clicker to start'));
         }
       }, 10000);
 
@@ -76,7 +77,7 @@ export class ClickerProcess {
         if (!resolved) {
           resolved = true;
           clearTimeout(timeout);
-          reject(new Error(`clicker exited with code ${code}\nOutput: ${output}`));
+          reject(new BrowserCrashedError(code ?? 1, output));
         }
       });
     });

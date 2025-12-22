@@ -3,6 +3,8 @@ package bidi
 import (
 	"encoding/json"
 	"fmt"
+
+	errs "github.com/vibium/clicker/internal/errors"
 )
 
 // ElementInfo contains information about a found element.
@@ -96,7 +98,7 @@ func (c *Client) FindElement(context, selector string) (*ElementInfo, error) {
 
 	// Check if element was found
 	if remoteValue.Type == "null" {
-		return nil, fmt.Errorf("element not found: %s", selector)
+		return nil, &errs.ElementNotFoundError{Selector: selector, Context: context}
 	}
 
 	// Parse the JSON string value

@@ -1,5 +1,6 @@
 import WebSocket from 'ws';
 import { BiDiMessage } from './types';
+import { ConnectionError } from '../utils/errors';
 
 export type MessageHandler = (msg: BiDiMessage) => void;
 
@@ -40,7 +41,7 @@ export class BiDiConnection {
       });
 
       ws.on('error', (err) => {
-        reject(err);
+        reject(new ConnectionError(url, err as Error));
       });
     });
   }

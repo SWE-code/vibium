@@ -1,4 +1,5 @@
 import { BiDiClient } from './bidi';
+import { ElementNotFoundError } from './utils/errors';
 
 export interface BoundingBox {
   x: number;
@@ -82,7 +83,7 @@ export class Element {
     });
 
     if (result.result.type === 'null') {
-      throw new Error(`Element not found: ${this.selector}`);
+      throw new ElementNotFoundError(this.selector);
     }
 
     return result.result.value as string;
@@ -130,7 +131,7 @@ export class Element {
     });
 
     if (result.result.type === 'null') {
-      throw new Error(`Element not found: ${this.selector}`);
+      throw new ElementNotFoundError(this.selector);
     }
 
     return JSON.parse(result.result.value as string) as BoundingBox;

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/vibium/clicker/internal/bidi"
+	errs "github.com/vibium/clicker/internal/errors"
 )
 
 // Default timeouts and intervals
@@ -62,20 +63,6 @@ var (
 	}
 )
 
-// TimeoutError is returned when a wait operation times out.
-type TimeoutError struct {
-	Selector string
-	Timeout  time.Duration
-	Reason   string
-}
-
-func (e *TimeoutError) Error() string {
-	if e.Reason != "" {
-		return fmt.Sprintf("timeout after %s waiting for '%s': %s", e.Timeout, e.Selector, e.Reason)
-	}
-	return fmt.Sprintf("timeout after %s waiting for '%s'", e.Timeout, e.Selector)
-}
-
 // WaitOptions configures wait behavior.
 type WaitOptions struct {
 	Timeout  time.Duration
@@ -110,7 +97,7 @@ func WaitForSelector(client *bidi.Client, context, selector string, opts WaitOpt
 
 		// Check if we've timed out
 		if time.Now().After(deadline) {
-			return &TimeoutError{
+			return &errs.TimeoutError{
 				Selector: selector,
 				Timeout:  opts.Timeout,
 				Reason:   "element not found",
@@ -165,7 +152,7 @@ func WaitForActionable(client *bidi.Client, context, selector string, checks []C
 			if checkErr != nil {
 				reason = fmt.Sprintf("check '%s' failed: %v", failedCheck, checkErr)
 			}
-			return &TimeoutError{
+			return &errs.TimeoutError{
 				Selector: selector,
 				Timeout:  opts.Timeout,
 				Reason:   reason,

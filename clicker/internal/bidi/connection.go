@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	errs "github.com/vibium/clicker/internal/errors"
 )
 
 // Connection represents a WebSocket connection.
@@ -18,7 +19,7 @@ type Connection struct {
 func Connect(url string) (*Connection, error) {
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to %s: %w", url, err)
+		return nil, &errs.ConnectionError{URL: url, Cause: err}
 	}
 
 	return &Connection{
