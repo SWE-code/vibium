@@ -3,11 +3,7 @@ package process
 import (
 	"os"
 	"os/exec"
-	"os/signal"
 	"sync"
-	"syscall"
-
-	"github.com/vibium/clicker/internal/log"
 )
 
 // Manager tracks and manages spawned browser processes.
@@ -43,15 +39,7 @@ func KillAll() {
 	defaultManager.mu.Lock()
 	defer defaultManager.mu.Unlock()
 	for _, cmd := range defaultManager.browsers {
-		if cmd.Process != nil {
-			// Kill the entire process group to get all child processes
-			pgid, err := syscall.Getpgid(cmd.Process.Pid)
-			if err == nil {
-				syscall.Kill(-pgid, syscall.SIGKILL)
-			} else {
-				cmd.Process.Kill()
-			}
-		}
+		killProcess(cmd)
 	}
 	defaultManager.browsers = nil
 }
@@ -68,7 +56,7 @@ func KillBrowser(cmd *exec.Cmd) error {
 // SetupSignalHandler sets up cleanup on SIGINT/SIGTERM.
 func SetupSignalHandler() {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	setupSignalNotify(c)
 
 	go func() {
 		<-c
@@ -80,20 +68,7 @@ func SetupSignalHandler() {
 // WaitForSignal blocks until SIGINT/SIGTERM is received, then cleans up.
 func WaitForSignal() {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	setupSignalNotify(c)
 	<-c
 	KillAll()
-}
-
-// WithCleanup wraps a function with panic recovery that ensures browser cleanup.
-// If the function panics, all tracked browsers are killed before re-panicking.
-func WithCleanup(fn func()) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Error("panic recovered, cleaning up browsers", "panic", r)
-			KillAll()
-			panic(r) // re-panic after cleanup
-		}
-	}()
-	fn()
 }

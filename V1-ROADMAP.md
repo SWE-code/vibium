@@ -764,9 +764,9 @@ Verify before packaging: ✅ 2025-12-21
 
 ## Day 12-13: Packaging
 
-### Milestone 12.1: Cross-Compile Script
+### Milestone 12.1: Cross-Compile Target
 ```
-Create scripts/build-clicker.sh:
+Add build-all-platforms target to Makefile:
 
 Uses Go's built-in cross-compilation:
 - GOOS=linux GOARCH=amd64 go build ...
@@ -775,14 +775,18 @@ Uses Go's built-in cross-compilation:
 - GOOS=darwin GOARCH=arm64 go build ...
 - GOOS=windows GOARCH=amd64 go build ...
 
-Output to clicker/bin/clicker-{platform}-{arch}
+Output to clicker/bin/clicker-{os}-{arch}[.exe]
 
 Use CGO_ENABLED=0 for static binaries.
+Use -ldflags="-s -w" for smaller binaries.
+
+Note: Requires platform-specific build files for process management
+(process_unix.go, process_windows.go, launcher_unix.go, launcher_windows.go)
 ```
 
 **Checkpoint:**
 ```bash
-./scripts/build-clicker.sh
+make build-all-platforms
 ls -la clicker/bin/
 file clicker/bin/clicker-linux-amd64  # Should show static binary
 ```

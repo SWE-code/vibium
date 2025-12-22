@@ -156,6 +156,5 @@ vibium/
 │       └── README.md
 │
 └── scripts/                              # Build scripts (Day 12)
-    ├── build-clicker.sh                  # Go cross-compile
     └── package-npm.sh                    # Package for npm publish
 ```

@@ -1,4 +1,4 @@
-.PHONY: all build build-go build-js deps clean clean-bin clean-js clean-cache clean-all serve test test-cli test-js test-mcp double-tap help
+.PHONY: all build build-go build-js build-all-platforms deps clean clean-bin clean-js clean-cache clean-all serve test test-cli test-js test-mcp double-tap help
 
 # Default target
 all: build
@@ -13,6 +13,18 @@ build-go: deps
 # Build JS client
 build-js: deps
 	cd clients/javascript && npm run build
+
+# Cross-compile clicker for all platforms (static binaries)
+# Output: clicker/bin/clicker-{os}-{arch}[.exe]
+build-all-platforms:
+	@echo "Cross-compiling clicker for all platforms..."
+	cd clicker && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/clicker-linux-amd64 ./cmd/clicker
+	cd clicker && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o bin/clicker-linux-arm64 ./cmd/clicker
+	cd clicker && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o bin/clicker-darwin-amd64 ./cmd/clicker
+	cd clicker && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o bin/clicker-darwin-arm64 ./cmd/clicker
+	cd clicker && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o bin/clicker-windows-amd64.exe ./cmd/clicker
+	@echo "Done. Built binaries:"
+	@ls -lh clicker/bin/clicker-*
 
 # Install npm dependencies (skip if node_modules exists)
 deps:
@@ -75,17 +87,18 @@ clean: clean-bin clean-js
 # Show available targets
 help:
 	@echo "Available targets:"
-	@echo "  make             - Build everything (default)"
-	@echo "  make build-go    - Build clicker binary"
-	@echo "  make build-js    - Build JS client"
-	@echo "  make deps        - Install npm dependencies"
-	@echo "  make serve       - Start proxy server on :9515"
-	@echo "  make test        - Run all tests (CLI + JS + MCP)"
-	@echo "  make test-cli    - Run CLI tests only"
-	@echo "  make test-js     - Run JS library tests only"
-	@echo "  make test-mcp    - Run MCP server tests only"
-	@echo "  make double-tap  - Kill zombie Chrome/chromedriver processes"
-	@echo "  make clean       - Clean binaries and JS dist"
-	@echo "  make clean-cache - Clean cached Chrome for Testing"
-	@echo "  make clean-all   - Clean everything"
-	@echo "  make help        - Show this help"
+	@echo "  make                    - Build everything (default)"
+	@echo "  make build-go           - Build clicker binary"
+	@echo "  make build-js           - Build JS client"
+	@echo "  make build-all-platforms - Cross-compile clicker for all platforms"
+	@echo "  make deps               - Install npm dependencies"
+	@echo "  make serve              - Start proxy server on :9515"
+	@echo "  make test               - Run all tests (CLI + JS + MCP)"
+	@echo "  make test-cli           - Run CLI tests only"
+	@echo "  make test-js            - Run JS library tests only"
+	@echo "  make test-mcp           - Run MCP server tests only"
+	@echo "  make double-tap         - Kill zombie Chrome/chromedriver processes"
+	@echo "  make clean              - Clean binaries and JS dist"
+	@echo "  make clean-cache        - Clean cached Chrome for Testing"
+	@echo "  make clean-all          - Clean everything"
+	@echo "  make help               - Show this help"

@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"syscall"
 	"time"
 
 	"github.com/vibium/clicker/internal/log"
@@ -120,7 +119,7 @@ func Launch(opts LaunchOptions) (*LaunchResult, error) {
 
 	// Start chromedriver as a process group leader so we can kill all children
 	cmd := exec.Command(chromedriverPath, fmt.Sprintf("--port=%d", port))
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	setProcGroup(cmd)
 	if opts.Verbose {
 		fmt.Println("       ------- chromedriver -------")
 		pw := newPrefixWriter(os.Stdout, "       ")
@@ -318,11 +317,11 @@ func killProcessTree(pid int) {
 
 	// Kill descendants first (deepest children first)
 	for i := len(descendants) - 1; i >= 0; i-- {
-		syscall.Kill(descendants[i], syscall.SIGKILL)
+		killByPid(descendants[i])
 	}
 
 	// Kill the root process
-	syscall.Kill(pid, syscall.SIGKILL)
+	killByPid(pid)
 
 	// Wait a moment for processes to die
 	time.Sleep(100 * time.Millisecond)
@@ -402,7 +401,7 @@ func killOrphanedChromeProcesses() {
 func killProcessTreeByPid(pid int) {
 	descendants := getDescendants(pid)
 	for i := len(descendants) - 1; i >= 0; i-- {
-		syscall.Kill(descendants[i], syscall.SIGKILL)
+		killByPid(descendants[i])
 	}
-	syscall.Kill(pid, syscall.SIGKILL)
+	killByPid(pid)
 }
