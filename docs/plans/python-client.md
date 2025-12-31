@@ -104,7 +104,7 @@ source .venv/bin/activate
 pip install -e ../../packages/python/vibium_darwin_arm64
 pip install -e .
 
-python -c "
+python3 -c "
 from vibium import browser_sync
 vibe = browser_sync.launch()
 vibe.go('https://example.com')

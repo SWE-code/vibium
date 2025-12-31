@@ -18,7 +18,7 @@ Six packages total:
 ## Prerequisites
 
 ```bash
-python -m venv .venv-publish
+python3 -m venv .venv-publish
 source .venv-publish/bin/activate
 pip install twine
 ```
@@ -108,5 +108,5 @@ Before publishing a new version:
 
 ```bash
 pip install vibium
-python -c "from vibium import browser_sync; print('OK')"
+python3 -c "from vibium import browser_sync; print('OK')"
 ```
