@@ -1,7 +1,5 @@
 # pip install vibium 🥂
 
-**date:** 2025-12-31
-
 happy new year! we shipped v1 by christmas. now we're ringing in 2026 by publishing the Python client to PyPI.
 
 ```bash
